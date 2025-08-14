@@ -29,13 +29,23 @@ class MyPlugin(Star):
         if not help_msg:
             yield event.plain_result("没有找到任何插件或命令")
             return
-        text_msg = """可用命令：
-"""
-        for plugin_name, commands in help_msg.items():
-            text_msg += f"插件：{plugin_name}\n"
-            for cmd in commands:
-                text_msg += f"  - {cmd}\n"
-        yield event.plain_result(text_msg)
+        if len(event.message.split()) > 1:
+            # 处理 /help 插件名 的情况
+            plugin_name = event.message.split()[1]
+            if plugin_name in help_msg:
+                text_msg = f"插件 {plugin_name} 的命令：\n"
+                for cmd in help_msg[plugin_name]:
+                    text_msg += f"  - {cmd}\n"
+                yield event.plain_result(text_msg)
+            else:
+                yield event.plain_result(f"未找到插件: {plugin_name}")
+        else:
+            # 只显示插件列表
+            text_msg = "可用插件：\n"
+            for plugin_name in help_msg.keys():
+                text_msg += f"  - {plugin_name}\n"
+            text_msg += "\n使用 /help 插件名 查看具体命令"
+            yield event.plain_result(text_msg)
 
     def get_all_commands(self) -> Dict[str, List[str]]:
         """获取所有其他插件及其命令列表, 格式为 {plugin_name: [command#desc]}"""
